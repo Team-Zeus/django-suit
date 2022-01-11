@@ -36,12 +36,14 @@ def paginator_number(cl, i):
         return mark_safe(
                 '<li class="disabled"><a href="#" onclick="return false;">..'
                 '.</a></li>')
-    elif i == cl.page_num:
-        return mark_safe(
-            '<li class="active"><a href="">%d</a></li> ' % (i + 1))
+    elif i+1 == cl.page_num:
+        return mark_safe('<li class="active"><a href="%s"%s>%d</a></li> ' % (
+            escape(cl.get_query_string({PAGE_VAR: i+1})),
+            (i == cl.paginator.num_pages - 1 and ' class="end"' or ''),
+            i + 1))
     else:
         return mark_safe('<li><a href="%s"%s>%d</a></li> ' % (
-            escape(cl.get_query_string({PAGE_VAR: i})),
+            escape(cl.get_query_string({PAGE_VAR: i+1})),
             (i == cl.paginator.num_pages - 1 and ' class="end"' or ''),
             i + 1))
 
@@ -56,7 +58,8 @@ def paginator_info(cl):
         entries_to = paginator.count
     else:
         entries_from = (
-            (paginator.per_page * cl.page_num) + 1) if paginator.count > 0 else 0
+            paginator.per_page * (cl.page_num - 1) + 1
+        ) if paginator.count > 0 else 0
         entries_to = entries_from - 1 + paginator.per_page
         if paginator.count < entries_to:
             entries_to = paginator.count
@@ -69,7 +72,7 @@ def pagination(cl):
     """
     Generates the series of links to the pages in a paginated list.
     """
-    paginator, page_num = cl.paginator, cl.page_num
+    paginator, page_num = cl.paginator, min(cl.page_num, cl.paginator.num_pages - 1)
 
     pagination_required = (not cl.show_all or not cl.can_show_all) \
         and cl.multi_page
@@ -96,7 +99,7 @@ def pagination(cl):
                 page_range.extend(range(0, page_num + 1))
             if page_num < (paginator.num_pages - ON_EACH_SIDE - ON_ENDS - 1):
                 page_range.extend(
-                    range(page_num + 1, page_num + ON_EACH_SIDE + 1))
+                    range(page_num + 1, page_num + ON_EACH_SIDE))
                 page_range.append(DOT)
                 page_range.extend(
                     range(paginator.num_pages - ON_ENDS, paginator.num_pages))
