@@ -7,7 +7,11 @@
             {% endif %}
         </h2>{% endif %}
   {% for line in fieldset %}
-    {% with line.fields|length == '1' as singlefield %}
+    {% if line.fields|length == 1 %}
+        {% with True as singlefield %}
+    {% else %}
+        {% with False as singlefield %}
+    {% endif %}
       <div class="control-group form-row{% if line.errors %} {{ singlefield|yesno:'error,first-error' }} errors{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %} {{ field.field.field.widget.attrs.rowclass }}{% endfor %}{{ singlefield|yesno:',multi-field-row' }}">
         {% for field in line %}
           {% spaceless %}
