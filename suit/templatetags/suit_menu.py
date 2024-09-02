@@ -349,7 +349,13 @@ class Menu(object):
         }
 
     def get_native_model_url(self, model):
-        return model.get('admin_url') or model.get('add_url', '')
+        _model = model.get('model')
+        url = ''
+        if _model:
+            info = (_model._meta.app_label, _model._meta.model_name)
+            url = reverse('admin:%s_%s_changelist' % info)
+
+        return model.get('admin_url') or model.get('add_url', '') or url
 
     def process_model(self, model, app_name):
         if 'model' in model:
